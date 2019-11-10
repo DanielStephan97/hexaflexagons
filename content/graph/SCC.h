@@ -12,6 +12,7 @@
  * in reverse topological order. comp[i] holds the component
  * index of a node (a component only has edges to components with
  * lower index). ncomps will contain the number of components.
+ * To get all nodes of a component use counting sort.
  */
 #pragma once
 

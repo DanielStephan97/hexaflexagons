@@ -1,46 +1,48 @@
 /**
- * Author: Chen Xing
- * Date: 2009-10-13
+ * Author: HPI programming club
+ * Date: 2019-11-10
  * License: CC0
  * Source: N/A
- * Description: Flow algorithm with guaranteed complexity $O(VE^2)$. To get edge flow values, compare
- * capacities before and after, and take the positive values only.
+ * Description: Flow algorithm with guaranteed complexity $O(VE^2)$.
+ * To obtain the actual flow, look at positive values only.
  * Status: Working
  */
-#pragma once
-
-template<class T> T edmondsKarp(vector<unordered_map<int, T>>& graph, int source, int sink) {
-	assert(source != sink);
-	T flow = 0;
-	vi par(sz(graph)), q = par;
-
-	for (;;) {
-		fill(all(par), -1);
-		par[source] = 0;
-		int ptr = 1;
-		q[0] = source;
-
-		rep(i,0,ptr) {
-			int x = q[i];
-			trav(e, graph[x]) {
-				if (par[e.first] == -1 && e.second > 0) {
-					par[e.first] = x;
-					q[ptr++] = e.first;
-					if (e.first == sink) goto out;
-				}
-			}
-		}
-		return flow;
-out:
-		T inc = numeric_limits<T>::max();
-		for (int y = sink; y != source; y = par[y])
-			inc = min(inc, graph[par[y]][y]);
-
-		flow += inc;
-		for (int y = sink; y != source; y = par[y]) {
-			int p = par[y];
-			if ((graph[p][y] -= inc) <= 0) graph[p].erase(y);
-			graph[y][p] += inc;
-		}
-	}
-}
+struct edge {
+    int from, to;
+    ll flow, cap;
+    edge* twin;
+};
+struct flow {
+    flow(int n, int s, int t) : adj(n), s(s), t(t) {}
+    vector<vector<edge*>> adj;
+    int s, t;
+    void add_edge(int a, int b, ll cap) {
+        auto ab = new edge{a, b, 0, cap, nullptr};
+        //auto ba = new edge{b, a, 0, cap, ab}; //undirected graph
+        auto ba = new edge{b, a, 0, 0, ab}; //directed graph
+        ab->twin = ba;
+        adj[a].push_back(ab);
+        adj[b].push_back(ba);
+    }
+    ll eddy() {
+        ll flow = 0;
+        while(true) {
+            vector<edge *> inc(adj.size(), nullptr);
+            queue<int> q{{s}};
+            while (!q.empty()) {
+                auto v = q.front(); q.pop();
+                for (auto e : adj[v])
+                    if (!inc[e->to] && e->flow < e->cap)
+                        q.push(e->to), inc[e->to] = e;
+            }
+            if (!inc[t]) break;
+            ll aug = LONGINF;
+            for (int v = t; v != s; v = inc[v]->from)
+                aug = min(aug, inc[v]->cap - inc[v]->flow);
+            flow += aug;
+            for (int v = t; v != s; v = inc[v]->from)
+                inc[v]->flow += aug, inc[v]->twin->flow -= aug;
+        }
+        return flow;
+    }
+};

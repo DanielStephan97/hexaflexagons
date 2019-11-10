@@ -1,5 +1,10 @@
 \chapter{Geometry}
 
+\section{Formulas}
+\subsection{Shoelace Formula}
+Let $((x_1, y_1), \dots, (x_n, y_n))$ be a not-selfintersecting polygon. Then
+$$A=\frac{1}{2}\left | \sum_{i=1}^{n-1}x_iy_{i+1}+x_ny_1-\sum_{i=1}^{n-1}x_{i+i}y_i-x_1y_n\right |$$
+
 \section{Geometric primitives}
 	\kactlimport{Point.h}
 	\kactlimport{lineDistance.h}

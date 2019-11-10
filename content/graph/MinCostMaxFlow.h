@@ -1,93 +1,85 @@
 /**
- * Author: Stanford
- * Date: Unknown
- * Source: Stanford Notebook
- * Description: Min-cost max-flow. cap[i][j] != cap[j][i] is allowed; double edges are not.
- *  If costs can be negative, call setpi before maxflow, but note that negative cost cycles are not supported.
+ * Author: HPI programming club
+ * Date: 2019-11-10
+ * Source: 
+ * Description: Min-cost max-flow.
+ *  Negative cost cycles are not supported.
  *  To obtain the actual flow, look at positive values only.
- * Status: Tested on kattis mincostmaxflow
- * Time: Approximately O(E^2)
+ *  Without negative cost edges remove bellman-ford and $O(EV)$ from runtime
+ * Status: Tested
+ * Time: Approximately $O(EF\log V + EV)$, F flow value.
  */
-#pragma once
-
-// #include <bits/extc++.h> /// include-line, keep-include
-
-const ll INF = numeric_limits<ll>::max() / 4;
-typedef vector<ll> VL;
-
-struct MCMF {
-	int N;
-	vector<vi> ed, red;
-	vector<VL> cap, flow, cost;
-	vi seen;
-	VL dist, pi;
-	vector<pii> par;
-
-	MCMF(int N) :
-		N(N), ed(N), red(N), cap(N, VL(N)), flow(cap), cost(cap),
-		seen(N), dist(N), pi(N), par(N) {}
-
-	void addEdge(int from, int to, ll cap, ll cost) {
-		this->cap[from][to] = cap;
-		this->cost[from][to] = cost;
-		ed[from].push_back(to);
-		red[to].push_back(from);
-	}
-
-	void path(int s) {
-		fill(all(seen), 0);
-		fill(all(dist), INF);
-		dist[s] = 0; ll di;
-
-		__gnu_pbds::priority_queue<pair<ll, int>> q;
-		vector<decltype(q)::point_iterator> its(N);
-		q.push({0, s});
-
-		auto relax = [&](int i, ll cap, ll cost, int dir) {
-			ll val = di - pi[i] + cost;
-			if (cap && val < dist[i]) {
-				dist[i] = val;
-				par[i] = {s, dir};
-				if (its[i] == q.end()) its[i] = q.push({-dist[i], i});
-				else q.modify(its[i], {-dist[i], i});
-			}
-		};
-
-		while (!q.empty()) {
-			s = q.top().second; q.pop();
-			seen[s] = 1; di = dist[s] + pi[s];
-			trav(i, ed[s]) if (!seen[i])
-				relax(i, cap[s][i] - flow[s][i], cost[s][i], 1);
-			trav(i, red[s]) if (!seen[i])
-				relax(i, flow[i][s], -cost[i][s], 0);
-		}
-		rep(i,0,N) pi[i] = min(pi[i] + dist[i], INF);
-	}
-
-	pair<ll, ll> maxflow(int s, int t) {
-		ll totflow = 0, totcost = 0;
-		while (path(s), seen[t]) {
-			ll fl = INF;
-			for (int p,r,x = t; tie(p,r) = par[x], x != s; x = p)
-				fl = min(fl, r ? cap[p][x] - flow[p][x] : flow[x][p]);
-			totflow += fl;
-			for (int p,r,x = t; tie(p,r) = par[x], x != s; x = p)
-				if (r) flow[p][x] += fl;
-				else flow[x][p] -= fl;
-		}
-		rep(i,0,N) rep(j,0,N) totcost += cost[i][j] * flow[i][j];
-		return {totflow, totcost};
-	}
-
-	// If some costs can be negative, call this before maxflow:
-	void setpi(int s) { // (otherwise, leave this out)
-		fill(all(pi), INF); pi[s] = 0;
-		int it = N, ch = 1; ll v;
-		while (ch-- && it--)
-			rep(i,0,N) if (pi[i] != INF)
-				trav(to, ed[i]) if (cap[i][to])
-					if ((v = pi[i] + cost[i][to]) < pi[to])
-						pi[to] = v, ch = 1;
-		assert(it >= 0); // negative cost cycle
-	}
+struct edge {
+    int from, to;
+    ll flow, cap, cost;
+    edge* twin;
+};
+struct flow {
+    flow(int n, int s, int t) : adj(n), s(s), t(t) {}
+    vector<vector<edge*>> adj;
+    int s, t;
+    void add_edge(int a, int b, ll cap, ll cost) {
+        auto ab = new edge{a, b, 0, cap, cost, nullptr};
+        auto ba = new edge{b, a, 0, 0, -cost, ab};
+        ab->twin = ba;
+        adj[a].push_back(ab);
+        adj[b].push_back(ba);
+    }
+    void bellman_ford(vector<ll>& dist) {
+        dist.assign(adj.size(), LONGINF);
+        vector<bool> inq(adj.size(), false);
+        queue<int> q{{s}};
+        inq[s] = true; dist[s] = 0;
+        while (!q.empty()) {
+            int v = q.front();
+            q.pop(); inq[v] = false;
+            for (auto e : adj[v]) {
+                if (e->flow < e->cap && dist[e->from] + e->cost < dist[e->to]) {
+                    dist[e->to] = dist[e->from] + e->cost;
+                    if (!inq[e->to])
+                        inq[e->to] = true, q.push(e->to);
+                }
+            }
+        }
+    }
+    pair<ll, ll> costflow() {
+        int n = adj.size();
+        vector<ll> dist(n), pi(n);
+        vector<edge *> inc(n);
+        bellman_ford(pi);
+        ll value = 0;
+        while (1) {
+            dist.assign(n, LONGINF);
+            inc.assign(n, nullptr);
+            priority_queue<pair<ll, int>> q;
+            q.emplace(0, s);
+            dist[s] = 0;
+            while (q.size()) {
+                auto[d, v] = q.top(); q.pop(); d = -d;
+                if (d > dist[v]) continue;
+                for (auto e : adj[v]) {
+                    auto new_dist = d + pi[v] + e->cost - pi[e->to];
+                    if (e->flow < e->cap && new_dist < dist[e->to]) {
+                        dist[e->to] = new_dist;
+                        q.emplace(-new_dist, e->to);
+                        inc[e->to] = e;
+                    }
+                }
+            }
+            if (!inc[t]) break;
+            for (int i = 0; i < n; ++i) pi[i] += dist[i];
+            ll aug = LONGINF;
+            for (int v = t; v != s; v = inc[v]->from)
+                aug = min(aug, inc[v]->cap - inc[v]->flow);
+            value += aug;
+            for (int v = t; v != s; v = inc[v]->from)
+                inc[v]->flow += aug, inc[v]->twin->flow -= aug;
+        }
+        ll cost = 0;
+        for (auto& row : adj)
+            for (auto e : row)
+                cost += e->flow * e->cost;
+        cost /= 2;
+        return {value, cost};
+    }
 };
