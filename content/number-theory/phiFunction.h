@@ -25,3 +25,12 @@ void calculatePhi() {
 	for(int i = 3; i < LIM; i += 2) if(phi[i] == i)
 		for(int j = i; j < LIM; j += i) phi[j] -= phi[j] / i;
 }
+
+ll totient(ll n) {
+    ll ans = n;
+	// prime_factors must not repeat any prime factor
+    for (auto p : prime_factors(ans))
+        ans -= ans / p;
+    return ans;
+}
+
