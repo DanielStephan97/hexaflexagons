@@ -6,12 +6,10 @@
  * Euclid also finds two integers $x$ and $y$, such that $ax+by=\gcd(a,b)$.
  * If $a$ and $b$ are coprime, then $x$ is the inverse of $a \pmod{b}$.
  */
-#pragma once
-
-ll gcd(ll a, ll b) { return __gcd(a, b); }
-
-ll euclid(ll a, ll b, ll &x, ll &y) {
-	if (b) { ll d = euclid(b, a % b, y, x);
-		return y -= a/b * x, d; }
-	return x = 1, y = 0, a;
+array<ll,3> euclid(ll a, ll b) {
+    if (a == 0)
+        return {b, 0, 1};
+    auto [d, x1, y1] = gcd(b % a, a);
+    return {d, y1 - (b / a) * x1, x1};
 }
+

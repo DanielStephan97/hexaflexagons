@@ -10,14 +10,12 @@
  * Status: Works
  * Time: $\log(n)$
  */
-#pragma once
-
 #include "euclid.h"
 
-ll crt(ll a, ll m, ll b, ll n) {
-	if (n > m) swap(a, b), swap(m, n);
-	ll x, y, g = euclid(m, n, x, y);
-	assert((a - b) % g == 0); // else no solution
-	x = (b - a) % n * x % n / g * m + a;
-	return x < 0 ? x + m*n/g : x;
+pair<ll,ll> crt(ll a, ll n, ll b, ll m) {
+    auto [d, x, y] = euclid(n, m);
+    ll l = n * m / d;
+    ll ret = (a + ((x * (b-a) / d) % (m/d)) * n) % l;
+    return {(b-a) % d ? -1 : (ret + l) % l, l};
 }
+
