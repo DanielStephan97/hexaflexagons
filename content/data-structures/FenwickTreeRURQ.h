@@ -16,15 +16,9 @@ struct FTR {
 	FT a, b;
 	FTR(int n) : a(n), b(n) {}
 	void update(int l, int r, ll d) {
-		a.update(l, d);
-		a.update(r, -d);
-		b.update(l, -l*d);
-		b.update(r, r*d);
+		a.update(l, d), a.update(r, -d);
+		b.update(l, -l*d), b.update(r, r*d);
 	}
-	ll p_query(int r) {
-		return r ? a.query(r) * r + b.query(r) : 0;
-	}
-	ll query(int l, int r) {
-		return p_query(r) - p_query(l);
-	}
+	ll p_query(int r) {return a.query(r) * r + b.query(r);}
+	ll query(int l, int r) {return p_query(r) - p_query(l);}
 };
