@@ -14,10 +14,9 @@ struct edge {
     ll flow, cap, cost;
     edge* twin;
 };
-struct flow {
-    flow(int n, int s, int t) : adj(n), s(s), t(t) {}
+struct MCMF {
+    MCMF(int n) : adj(n){}
     vector<vector<edge*>> adj;
-    int s, t;
     void add_edge(int a, int b, ll cap, ll cost) {
         auto ab = new edge{a, b, 0, cap, cost, nullptr};
         auto ba = new edge{b, a, 0, 0, -cost, ab};
@@ -25,8 +24,8 @@ struct flow {
         adj[a].push_back(ab);
         adj[b].push_back(ba);
     }
-    void bellman_ford(vector<ll>& dist) {
-        dist.assign(adj.size(), LONGINF);
+    void bellman_ford(vector<ll>& dist, int s) {
+        dist.assign(adj.size(), 1e18);
         vector<bool> inq(adj.size(), false);
         queue<int> q{{s}};
         inq[s] = true; dist[s] = 0;
@@ -42,14 +41,14 @@ struct flow {
             }
         }
     }
-    pair<ll, ll> costflow() {
+    pair<ll, ll> costflow(int s, int t) {
         int n = adj.size();
         vector<ll> dist(n), pi(n);
         vector<edge *> inc(n);
-        bellman_ford(pi);
+        bellman_ford(pi, s);
         ll value = 0;
         while (1) {
-            dist.assign(n, LONGINF);
+            dist.assign(n, 1e18);
             inc.assign(n, nullptr);
             priority_queue<pair<ll, int>> q;
             q.emplace(0, s);
@@ -68,7 +67,7 @@ struct flow {
             }
             if (!inc[t]) break;
             for (int i = 0; i < n; ++i) pi[i] += dist[i];
-            ll aug = LONGINF;
+            ll aug = 1e18;
             for (int v = t; v != s; v = inc[v]->from)
                 aug = min(aug, inc[v]->cap - inc[v]->flow);
             value += aug;

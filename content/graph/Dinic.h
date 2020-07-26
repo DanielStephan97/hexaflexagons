@@ -1,59 +1,53 @@
 /**
- * Author: HPI programming club
+ * Author: chilli
  * Date: 2019-11-10
  * License: CC0
- * Source: 
- * Description: Flow algorithm with complexity $O(V^2E)$.
- * $O(\sqrt{V}E)$ for unit graphs (especially bipartite matching).
- * To obtain the actual flow, look at positive values only.
- * Status: Tested
+ * Source: https://cp-algorithms.com/graph/dinic.html
+ * Description: Flow algorithm with complexity $O(VE\log U)$ where $U = \max |\text{cap}|$.
+ * $O(\min(E^{1/2}, V^{2/3})E)$ if $U = 1$; $O(\sqrt{V}E)$ for bipartite matching.
+ * Status: Tested on SPOJ FASTFLOW and SPOJ MATCHING, stress-tested
  */
-struct edge {
-    int from, to;
-    ll flow, cap;
-    edge* twin;
-};
-struct flow {
-    flow(int n, int s, int t) : adj(n), s(s), t(t) {}
-    vector<vector<edge*>> adj;
-    int s, t;
-    void add_edge(int a, int b, ll cap) {
-        auto ab = new edge{a, b, 0, cap, nullptr};
-        //auto ba = new edge{b, a, 0, cap, ab}; //undirected graph
-        auto ba = new edge{b, a, 0, 0, ab}; //directed graph
-        ab->twin = ba;
-        adj[a].push_back(ab);
-        adj[b].push_back(ba);
-    }
-    ll dfs(int v, ll aug, vector<int> &dist, vector<int> &next) {
-        if (v == t) return aug;
-        for (int& i = next[v]; i<adj[v].size(); ++i) {
-            auto e = adj[v][i];
-            if (e->flow == e->cap || dist[e->to] != dist[v] + 1) continue;
-            if(ll pushed = dfs(e->to,min(aug, e->cap - e->flow), dist, next)) {
-                e->flow += pushed;
-                e->twin->flow -= pushed;
-                return pushed;
-            }
-        }
-        return 0;
-    }
-    ll dinic() {
-        ll flow = 0;
-        while(true) {
-            vector<int> dist(adj.size(), INTINF);
-            dist[s] = 0;
-            queue<int> q{{s}};
-            while (!q.empty()) {
-                auto v = q.front(); q.pop();
-                for (auto e : adj[v])
-                    if (dist[e->to] == INTINF &&e->flow < e->cap)
-                        q.push(e->to), dist[e->to] = dist[v] + 1;
-            }
-            if (dist[t] == INTINF) break;
-            vector<int> next(adj.size(), 0);
-            while(ll aug = dfs(s,LONGINF, dist, next)) flow += aug;
-        }
-        return flow;
-    }
+#pragma once
+
+struct Dinic {
+	struct Edge {
+		int to, rev;
+		ll c, oc;
+		ll flow() { return max(oc - c, 0LL); } // if you need flows
+	};
+	vi lvl, ptr, q;
+	vector<vector<Edge>> adj;
+	Dinic(int n) : lvl(n), ptr(n), q(n), adj(n) {}
+	void addEdge(int a, int b, ll c, int rcap = 0) {
+		adj[a].push_back({b, sz(adj[b]), c, c});
+		adj[b].push_back({a, sz(adj[a]) - 1, rcap, rcap});
+	}
+	ll dfs(int v, int t, ll f) {
+		if (v == t || !f) return f;
+		for (int& i = ptr[v]; i < sz(adj[v]); i++) {
+			Edge& e = adj[v][i];
+			if (lvl[e.to] == lvl[v] + 1)
+				if (ll p = dfs(e.to, t, min(f, e.c))) {
+					e.c -= p, adj[e.to][e.rev].c += p;
+					return p;
+				}
+		}
+		return 0;
+	}
+	ll calc(int s, int t) {
+		ll flow = 0; q[0] = s;
+		rep(L,0,31) do { // 'int L=30' maybe faster for random data
+			lvl = ptr = vi(sz(q));
+			int qi = 0, qe = lvl[s] = 1;
+			while (qi < qe && !lvl[t]) {
+				int v = q[qi++];
+				for (Edge e : adj[v])
+					if (!lvl[e.to] && e.c >> (30 - L))
+						q[qe++] = e.to, lvl[e.to] = lvl[v] + 1;
+			}
+			while (ll p = dfs(s, t, LLONG_MAX)) flow += p;
+		} while (lvl[t]);
+		return flow;
+	}
+	bool leftOfMinCut(int a) { return lvl[a] != 0; }
 };

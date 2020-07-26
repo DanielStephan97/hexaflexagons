@@ -9,6 +9,8 @@
  * Status: Tested
  */
 
+#include "Factor.h"
+
 ll discrete_log_coprime(ll b, const ll e, const ll m) {
     unordered_map<ll, ll> table;
     ll n = floor(sqrt(m)), x = e, a = 1;
@@ -34,7 +36,7 @@ pair<ll, ll> discrete_log(ll a, ll b, ll m) {
     else if (d == 1) return {discrete_log_coprime(a, b, m), discrete_log_coprime(a, 1, m)};
     else {
         ll m1 = 1, m2 = m;
-        trav(p, prime_factors(gcd(a, m))) while (m2 % p == 0) m1 *= p, m2 /= p;
+        for(auto p:prime_factors(gcd(a, m))) while (m2 % p == 0) m1 *= p, m2 /= p;
 
         ll n = 1, t = a;
         for (; t % m1 != 0; n++, t = t * a % m)
