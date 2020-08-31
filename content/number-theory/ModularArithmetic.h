@@ -10,21 +10,26 @@
 
 #include "euclid.h"
 
-const ll mod = 17; // change to something else
-struct Mod {
+using ll = long long;
+template<int mod>
+struct TMod {
 	ll x;
-	Mod(ll xx) : x(xx) {}
-	Mod operator+(Mod b) { return Mod((x + b.x) % mod); }
-	Mod operator-(Mod b) { return Mod((x - b.x + mod) % mod); }
-	Mod operator*(Mod b) { return Mod((x * b.x) % mod); }
-	Mod operator/(Mod b) { return *this * invert(b); }
-	Mod invert(Mod a) {
+	TMod(ll xx) : x(xx) {}
+	TMod operator+(TMod b) { return (x + b.x) % mod; }
+	TMod operator-(TMod b) { return (x - b.x + mod) % mod; }
+	TMod operator*(TMod b) { return (x * b.x) % mod; }
+	TMod operator/(TMod b) { return *this * invert(b); }
+	TMod invert(TMod a) {
 		ll x, y, g = euclid(a.x, mod, x, y);
-		assert(g == 1); return Mod((x + mod) % mod);
+		assert(g == 1); return (x + mod) % mod;
+		// for prime mod use
+		// return a.pow(mod - 2);
 	}
-	Mod operator^(ll e) {
-		if (!e) return Mod(1);
-		Mod r = *this ^ (e / 2); r = r * r;
+	TMod pow(ll e) {
+		if (!e) return 1;
+		TMod r = this->pow(e / 2); r = r * r;
 		return e&1 ? *this * r : r;
 	}
 };
+// change to something else
+using Mod = TMod<17>;
