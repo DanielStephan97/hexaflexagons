@@ -14,7 +14,7 @@ using ll = long long;
 template<int mod>
 struct TMod {
 	ll x;
-	TMod(ll xx) : x(xx) {}
+	TMod(ll xx) : x((xx%mod+mod)%mod) {}
 	TMod operator+(TMod b) { return (x + b.x) % mod; }
 	TMod operator-(TMod b) { return (x - b.x + mod) % mod; }
 	TMod operator*(TMod b) { return (x * b.x) % mod; }
