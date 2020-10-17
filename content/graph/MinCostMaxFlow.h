@@ -66,7 +66,7 @@ struct MCMF {
                 }
             }
             if (!inc[t]) break;
-            for (int i = 0; i < n; ++i) pi[i] += dist[i];
+            for (int i = 0; i < n; ++i) pi[i] += dist[i], pi[i] = min(pi[i], (ll)1e18);
             ll aug = 1e18;
             for (int v = t; v != s; v = inc[v]->from)
                 aug = min(aug, inc[v]->cap - inc[v]->flow);
