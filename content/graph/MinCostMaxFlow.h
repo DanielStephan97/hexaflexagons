@@ -5,7 +5,8 @@
  * Description: Min-cost max-flow.
  *  Negative cost cycles are not supported.
  *  To obtain the actual flow, look at positive values only.
- *  Without negative cost edges remove bellman-ford and $O(EV)$ from runtime
+ *  Without negative cost edges remove bellman-ford and $O(EV)$ from runtime.
+ *  If solving a dual problem pi gives the node potentials.
  * Status: Tested
  * Time: Approximately $O(EF\log V + EV)$, F flow value.
  */
