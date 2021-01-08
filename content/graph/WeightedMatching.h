@@ -17,6 +17,7 @@
 pair<int, vi> hungarian(const vector<vi> &a) {
 	if (a.empty()) return {0, {}};
 	int n = sz(a) + 1, m = sz(a[0]) + 1;
+	assert(n<=m);
 	vi u(n), v(m), p(m), ans(n - 1);
 	rep(i,1,n) {
 		p[0] = i;
