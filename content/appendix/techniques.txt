@@ -18,7 +18,9 @@ Graph theory
 	Bellman-Ford
 	Konig's theorem and vertex cover
 	Min-cost max flow
+	Matrix tree theorem
 	Maximal matching, general graphs
+	Hopcroft-Karp
 	Hall's marriage theorem
 	Floyd-Warshall
 	Euler cycles
@@ -30,12 +32,13 @@ Graph theory
 	Topological sorting
 	Strongly connected components
 	2-SAT
-	Cut vertices, cut-edges and biconnected components (dfs)
+	Cut vertices, cut-edges and biconnected components
 	Vertex coloring
 	* Bipartite graphs (=> trees)
 	* 3^n (special case of set cover)
 	Diameter and centroid
 	K'th shortest path
+	Shortest cycle
 Dynamic programming
 	Knapsack
 	Coin change
@@ -68,6 +71,7 @@ Number theory
 	Euler's theorem
 	Phi function
 	Quadratic reciprocity
+	Pollard-Rho
 	Miller-Rabin
 Probability theory
 Optimization
@@ -103,8 +107,7 @@ Sweeping
 Strings
 	Longest common substring
 	Palindrome subsequences
-	p function
-	z function
+	p/z function
 	Tries
 	Rolling polynomial hashes
 	Suffix array
@@ -120,6 +123,8 @@ Combinatorial search
 Data structures
 	LCA (2^k-jumps in trees in general)
 	Pull/push-technique on trees
+	Heavy-light decomposition
+	Centroid decomposition
 	Lazy propagation
 	Self-balancing trees
 	Convex hull trick (wcipeg.com/wiki/Convex_hull_trick)
