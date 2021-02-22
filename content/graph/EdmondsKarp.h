@@ -12,8 +12,8 @@ struct edge {
     ll flow, cap;
     edge* twin;
 };
-struct flow {
-    flow(int n, int s, int t) : adj(n), s(s), t(t) {}
+struct EkFlow {
+    EkFlow(int n) : adj(n) {}
     vector<vector<edge*>> adj;
     int s, t;
     void add_edge(int a, int b, ll cap) {
@@ -24,7 +24,7 @@ struct flow {
         adj[a].push_back(ab);
         adj[b].push_back(ba);
     }
-    ll eddy() {
+    ll eddy(int s, int t) {
         ll flow = 0;
         while(true) {
             vector<edge *> inc(adj.size(), nullptr);
@@ -36,7 +36,7 @@ struct flow {
                         q.push(e->to), inc[e->to] = e;
             }
             if (!inc[t]) break;
-            ll aug = LONGINF;
+            ll aug = 1e18;
             for (int v = t; v != s; v = inc[v]->from)
                 aug = min(aug, inc[v]->cap - inc[v]->flow);
             flow += aug;
